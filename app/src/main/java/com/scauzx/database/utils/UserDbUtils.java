@@ -145,10 +145,12 @@ public class UserDbUtils {
 
 
     public static void deleteAllUsers() {
-        try {
-            ResourceUtils.getContentResolver().delete(UserProvider.USER_CONTENT_URI, null,null);
-        } catch (Exception e) {
-            e.printStackTrace();
+        synchronized (mLock) {
+            try {
+                ResourceUtils.getContentResolver().delete(UserProvider.USER_CONTENT_URI, null,null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
