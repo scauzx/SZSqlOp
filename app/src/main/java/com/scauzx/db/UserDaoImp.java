@@ -5,9 +5,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Log;
+import com.scauzx.database.UserSQLiteOpenHelper;
+import com.scauzx.database.tables.UserTable;
 import com.scauzx.models.User;
-import com.scauzx.utils.TableUtils;
-
+import com.scauzx.utils.AppUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
 
 public class UserDaoImp implements UserDao {
     public static UserDaoImp sInstance;
+    private static UserSQLiteOpenHelper mUserHelper;
     private SQLiteDatabase mDataBase;
     private final String TAG = UserDaoImp.class.getSimpleName();
 
@@ -33,9 +35,18 @@ public class UserDaoImp implements UserDao {
         return sInstance;
     }
 
+
+    public UserDaoImp(){
+
+    }
+
     public void initDataBase() {
+        if (mUserHelper == null) {
+            mUserHelper = new UserSQLiteOpenHelper(AppUtils.getContext());
+        }
+
         if (mDataBase == null || !mDataBase.isOpen()) {
-            mDataBase = UserDataBaseFactory.getDataBase();
+            mDataBase = mUserHelper.getWritableDatabase();
         }
     }
 
@@ -51,9 +62,9 @@ public class UserDaoImp implements UserDao {
         mDataBase.beginTransaction();
         try {
             ContentValues values = new ContentValues();
-            values.put(TableUtils.ATTRIBUTE_USER_NAME, user.username);
-            values.put(TableUtils.ATTRIBUTE_USER_PASSWORD, user.password);
-            id = mDataBase.insert(TableUtils.TABLE_USER_NAME, null, values);
+            values.put(UserTable.ATTRIBUTE_USER_NAME, user.username);
+            values.put(UserTable.ATTRIBUTE_USER_PASSWORD, user.password);
+            id = mDataBase.insert(UserTable.TABLE_USER_NAME, null, values);
             mDataBase.setTransactionSuccessful();
             Log.i(TAG, "addUser: success");
         } catch (Exception e) {
@@ -75,9 +86,9 @@ public class UserDaoImp implements UserDao {
         initDataBase();
         mDataBase.beginTransaction();
         try {
-            String whereClause = TableUtils.ATTRIBUTE_USER_NAME + " =? ";
+            String whereClause = UserTable.ATTRIBUTE_USER_NAME + " =? ";
             String[] whereArgs = new String[] {username};
-            mDataBase.delete(TableUtils.TABLE_USER_NAME, whereClause, whereArgs);
+            mDataBase.delete(UserTable.TABLE_USER_NAME, whereClause, whereArgs);
             mDataBase.setTransactionSuccessful();
             Log.i(TAG, "deleteUser: success");
         } catch (Exception e) {
@@ -98,10 +109,10 @@ public class UserDaoImp implements UserDao {
             mDataBase.beginTransaction();
             try {
                 ContentValues values = new ContentValues();
-                values.put(TableUtils.ATTRIBUTE_USER_NAME, user.username);
-                values.put(TableUtils.ATTRIBUTE_USER_PASSWORD, user.password);
-                String whereClause = TableUtils.ATTRIBUTE_USER_NAME + " =? ";
-                mDataBase.update(TableUtils.TABLE_USER_NAME, values, whereClause, new String[] {user.username});
+                values.put(UserTable.ATTRIBUTE_USER_NAME, user.username);
+                values.put(UserTable.ATTRIBUTE_USER_PASSWORD, user.password);
+                String whereClause = UserTable.ATTRIBUTE_USER_NAME + " =? ";
+                mDataBase.update(UserTable.TABLE_USER_NAME, values, whereClause, new String[] {user.username});
                 mDataBase.setTransactionSuccessful();
                 Log.i(TAG, "updateUser: success");
             } catch (Exception e) {
@@ -122,13 +133,13 @@ public class UserDaoImp implements UserDao {
             initDataBase();
             mDataBase.beginTransaction();
             try {
-                String selection = TableUtils.ATTRIBUTE_USER_NAME + "= '" + username + "'";
-                Cursor cursor = mDataBase.query(TableUtils.TABLE_USER_NAME, null, selection, null, null, null, null);
+                String selection = UserTable.ATTRIBUTE_USER_NAME + "= '" + username + "'";
+                Cursor cursor = mDataBase.query(UserTable.TABLE_USER_NAME, null, selection, null, null, null, null);
                 if (cursor.moveToFirst()) {
                     user = new User();
-                    user.id = cursor.getInt(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_ID));
-                    user.username = cursor.getString(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_NAME));
-                    user.password = cursor.getString(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_PASSWORD));
+                    user.id = cursor.getInt(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_ID));
+                    user.username = cursor.getString(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_NAME));
+                    user.password = cursor.getString(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_PASSWORD));
                     Log.i(TAG, "queryUserByName: success user is " + user.toString());
                 }
                 mDataBase.setTransactionSuccessful();
@@ -150,12 +161,12 @@ public class UserDaoImp implements UserDao {
         List<User> users = new ArrayList<>();
         mDataBase.beginTransaction();
         try {
-            Cursor cursor = mDataBase.query(TableUtils.TABLE_USER_NAME, null,null,null,null,null,null,null);
+            Cursor cursor = mDataBase.query(UserTable.TABLE_USER_NAME, null,null,null,null,null,null,null);
             while (cursor.moveToNext()) {
                 User user = new User();
-                user.id = cursor.getInt(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_ID));
-                user.username = cursor.getString(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_NAME));
-                user.password = cursor.getString(cursor.getColumnIndex(TableUtils.ATTRIBUTE_USER_PASSWORD));
+                user.id = cursor.getInt(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_ID));
+                user.username = cursor.getString(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_NAME));
+                user.password = cursor.getString(cursor.getColumnIndex(UserTable.ATTRIBUTE_USER_PASSWORD));
                 users.add(user);
             }
             if (cursor != null) {
@@ -198,7 +209,7 @@ public class UserDaoImp implements UserDao {
         initDataBase();
         mDataBase.beginTransaction();
         try {
-            mDataBase.delete(TableUtils.TABLE_USER_NAME, null, null);
+            mDataBase.delete(UserTable.TABLE_USER_NAME, null, null);
             mDataBase.setTransactionSuccessful();
             Log.i(TAG, "deleteAllUser: success");
         } catch (Exception e) {

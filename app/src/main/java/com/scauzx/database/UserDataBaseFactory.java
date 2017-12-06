@@ -1,4 +1,4 @@
-package com.scauzx.db;
+package com.scauzx.database;
 
 import android.database.sqlite.SQLiteDatabase;
 

@@ -1,10 +1,10 @@
-package com.scauzx.db;
+package com.scauzx.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
-import com.scauzx.utils.TableUtils;
+import com.scauzx.database.tables.GameTable;
+import com.scauzx.database.tables.UserTable;
 
 
 /**
@@ -16,7 +16,7 @@ import com.scauzx.utils.TableUtils;
 public class UserSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static String DATABASE_NAME = "user_info.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     public UserSQLiteOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -24,14 +24,14 @@ public class UserSQLiteOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String tableUser = "CREATE TABLE IF NOT EXISTS " + TableUtils.TABLE_USER_NAME + " (" + TableUtils.ATTRIBUTE_USER_ID + " integer primary key autoincrement, " + TableUtils.ATTRIBUTE_USER_NAME +
-                " varchar(20), " + TableUtils.ATTRIBUTE_USER_PASSWORD + " varchar(20)" + ")";
-        db.execSQL(tableUser);
+        UserTable.onCreate(db);
+        GameTable.onCreate(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        UserTable.onUpgrade(db,oldVersion,newVersion);
+        GameTable.onUpgrade(db,oldVersion,newVersion);
     }
 
     @Override
